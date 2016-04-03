@@ -30,12 +30,6 @@ var ageDifference = ancestry.map(function (person) {
   return personBirthDate - motherBirthDate;
 });
 
-console.log(ageDifference);
-
-var filteredAgeDifference = ageDifference.filter(function (age) {
+console.log(average(ageDifference.filter(function (age) {
   return age != null;
-});
-
-console.log(filteredAgeDifference);
-
-console.log(average(filteredAgeDifference));
+})));
