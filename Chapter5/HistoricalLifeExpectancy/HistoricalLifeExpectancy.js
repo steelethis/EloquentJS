@@ -10,7 +10,7 @@ function average(array) {
 var agesByCentury = {};
 ancestry.forEach(function (person) {
   century = Math.ceil(person.died / 100);
-  if(agesByCentury[century] == null) {
+  if(agesByCentury[century] === null) {
     agesByCentury[century] = [];
   }
   agesByCentury[century].push(person.died - person.born);
