@@ -20,11 +20,6 @@ Vector.prototype.plus = function(other) {
     return new Vector(this.x + other.x, this.y + other.y);
 };
 
-// Testing grid logic
-var grid = ["top left", "top middle", "top right",
-            "bottom left", "bottom middle", "bottom right"];
-console.log(grid[2 + (1 * 3)]);
-
 function Grid(width, height) {
     this.space = new Array(width * height);
     this.width = width;
@@ -50,12 +45,6 @@ Grid.prototype.set = function(vector, value) {
     this.space[vector.x + this.width * vector.y] = value;
 };
 
-// Testing
-var grid = new Grid(5, 5);
-console.log(grid.get(new Vector(1, 1)));
-grid.set(new Vector(1,1), "X");
-console.log(grid.get(new Vector(1, 1)));
-
 var directions = {
     "n": new Vector(0, -1),
     "ne": new Vector(1, -1),
@@ -67,6 +56,11 @@ var directions = {
     "nw": new Vector(-1, -1)
 };
 
+function dirPlus(dir, n) {
+    var index = directionNames.indexOf(dir);
+    return directionNames[(index + n + 8) % 8];
+}
+
 function randomElement(array) {
     return array[Math.floor(Math.random() * array.length)];
 }
@@ -77,7 +71,7 @@ function BouncingCritter() {
     this.direction = randomElement(directionNames);
 }
 BouncingCritter.prototype.act = function(view) {
-    if (view.look(this.direction != " ")) {
+    if (view.look(this.direction) != " ") {
         this.direction = view.find(" ") || "s";
     }
     return {type: "move", direction: this.direction};
@@ -183,6 +177,28 @@ View.prototype.find = function(ch) {
 
 function Wall() {}
 
+function WallFollower() {
+    this.dir = "s";
+}
+WallFollower.prototype.act = function(view) {
+    var start = this.dir;
+    if (view.look(dirPlus(this.dir, -3)) != " ") {
+        start = this.dir = dirPlus(this.dir, -2);
+    }
+    while (view.look(this.dir) != " ") {
+        this.dir = dirPlus(this.dir, 1);
+        if (this.dir === start) {
+            break;
+        }
+    }
+    return {type: "move", direction: this.dir};
+};
+
 // Testing World
 var world = new World(plan, {"#": Wall, "o": BouncingCritter});
 console.log(world.toString());
+
+for (var i = 0; i < 5; i++) {
+    world.turn();
+    console.log(world.toString());
+}
