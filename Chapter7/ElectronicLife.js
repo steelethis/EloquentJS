@@ -20,6 +20,13 @@ var directions = {
     "nw": new Vector(-1, -1)
 };
 
+var directionNames = "n ne e se s sw w nw".split(" ");
+
+function dirPlus(dir, n) {
+    var index = directionNames.indexOf(dir);
+    return directionNames[(index + n + 8) % 8];
+}
+
 function randomElement(array) {
     return array[Math.floor(Math.random() * array.length)];
 }

@@ -20,6 +20,13 @@ var directions = {
     "nw": new Vector(-1, -1)
 };
 
+var directionNames = "n ne e se s sw w nw".split(" ");
+
+function dirPlus(dir, n) {
+    var index = directionNames.indexOf(dir);
+    return directionNames[(index + n + 8) % 8];
+}
+
 function randomElement(array) {
     return array[Math.floor(Math.random() * array.length)];
 }
@@ -280,20 +287,33 @@ PlantEater.prototype.act = function (view) {
 
 function SmartPlantEater() {
     this.energy = 20;
+    this.dir = "s";
 }
 SmartPlantEater.prototype.act = function (view) {
     var space = view.find(" ");
-    if (this.energy > 21 && space) {
+    if (this.energy > 60 && space) {
         return {type: "reproduce", direction: space};
     }
 
     var plant = view.find("*");
-    if (plant && this.energy < 20) {
+    if (plant && view.findAll("*").length > 1) {
         return {type: "eat", direction: plant};
     }
-    if (space) {
-        return {type: "move", direction: space};
+
+    //Reusing old WallFollower movement pattern.
+
+    var start = this.dir;
+    if (view.look(dirPlus(this.dir, -3)) !== " ") {
+        start = this.dir = dirPlus(this.dir, -2);
     }
+    while (view.look(this.dir) !== " ") {
+        this.dir = dirPlus(this.dir, 1);
+        if (this.dir === start) {
+            break;
+        }
+    }
+
+    return {type: "move", direction: this.dir};
 };
 
 var valley = new LifeLikeWorld(
@@ -314,7 +334,7 @@ var valley = new LifeLikeWorld(
         "*": Plant}
 );
 
-for (var i = 0; i < 20; i++) {
+for (var i = 0; i < 100; i++) {
     valley.turn();
     console.log(valley.toString());
 }
