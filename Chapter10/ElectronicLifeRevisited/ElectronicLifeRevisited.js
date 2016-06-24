@@ -219,3 +219,48 @@
 
 
 })(this.world = {});
+
+//
+//  simple_ecosystem module
+//
+(function(exports, world) {
+    "use strict";
+
+    var randomElement = function(array) {
+        return array[Math.floor(Math.random() * array.length)];
+    };
+
+    function dirPlus(dir, n) {
+        var index = world.directionNames.indexOf(dir);
+        return world.directionNames[(index + n + 8) % 8];
+    }
+
+    exports.Wall = function() {};
+
+    exports.BouncingCritter = function() {
+        this.direction = randomElement(world.directionNames);
+    };
+    exports.BouncingCritter.prototype.act = function(view) {
+        if (view.look(this.direction) !== " ") {
+            this.direction = view.find(" ") || "s";
+        }
+    };
+
+    exports.WallFollower = function() {
+        this.dir = "s";
+    };
+    exports.WallFollower.prototype.act = function(view) {
+        var start = this.dir;
+        if (view.look(dirPlus(this.dir, -3)) !== " ") {
+            start = this.dir = dirPlus(this.dir, -2);
+        }
+        while (view.look(this.dir) !== " ") {
+            this.dir = dirPlus(this.dir, 1);
+            if (this.dir === start) {
+                break;
+            }
+        }
+    };
+
+})(this.simple_ecosystem = {});
+
