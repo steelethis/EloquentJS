@@ -28,6 +28,16 @@ var grid = (function () {
     Grid.prototype.set = function(vector, value) {
         this.space[vector.x + this.width * vector.y] = value;
     };
+    Grid.prototype.forEach = function(f, context) {
+        for (var y = 0; y < this.height; y++) {
+            for (var x = 0; x < this.width; x++) {
+                var value = this.space[x + y * this.width];
+                if (value !== null) {
+                    f.call(context, value, new Vector(x, y));
+                }
+            }
+        }
+    };
 
     var directions = {
         "n":  new Vector( 0, -1),
@@ -83,8 +93,8 @@ var world = ( function (grid) {
     }
     View.prototype.look = function(dir) {
         var target = this.vector.plus(directions[dir]);
-        if (this.world.grid.isInside(target)) {
-            return charFromElement(this.world.grid.get(target));
+        if (this.world.worldGrid.isInside(target)) {
+            return charFromElement(this.world.worldGrid.get(target));
         }
         else {
             return "#";
@@ -108,20 +118,21 @@ var world = ( function (grid) {
     };
 
     function World(map, legend) {
-        this.grid = new grid.Grid(map[0].length, map.length);
+        var worldGrid = new grid.Grid(map[0].length, map.length);
+        this.worldGrid = worldGrid;
         this.legend = legend;
 
         map.forEach(function (line, y) {
             for (var x = 0; x < line.length; x++) {
-                grid.set(new grid.Vector(x, y), elementFromChar(legend, line[x]));
+                worldGrid.set(new grid.Vector(x, y), elementFromChar(legend, line[x]));
             }
         });
     }
     World.prototype.toString = function () {
         var output = "";
-        for (var y = 0; y < this.grid.height; y++) {
-            for (var x = 0; x < this.grid.width; x++) {
-                var element = this.grid.get(new grid.Vector(x, y));
+        for (var y = 0; y < this.worldGrid.height; y++) {
+            for (var x = 0; x < this.worldGrid.width; x++) {
+                var element = this.worldGrid.get(new grid.Vector(x, y));
                 output += charFromElement(element);
             }
             output += "\n";
@@ -130,7 +141,7 @@ var world = ( function (grid) {
     };
     World.prototype.turn = function () {
         var acted = [];
-        this.grid.forEach(function (critter, vector) {
+        this.worldGrid.forEach(function (critter, vector) {
             if (critter.act && acted.indexOf(critter) === -1) {
                 acted.push(critter);
                 this.letAct(critter, vector);
@@ -141,7 +152,7 @@ var world = ( function (grid) {
         var action = critter.act(new View(this, vector));
         if (action && action.type === "move") {
             var dest = this.checkDestination(action, vector);
-            if (dest && this.grid.get(dest) === null) {
+            if (dest && this.worldGrid.get(dest) === null) {
                 this.grid.set(vector, null);
                 this.grid.set(dest, critter);
             }
@@ -150,7 +161,7 @@ var world = ( function (grid) {
     World.prototype.checkDestination = function (action, vector) {
         if (directions.hasOwnProperty(action.direction)) {
             var dest = vector.plus(directions[action.direction]);
-            if (this.grid.isInside(dest)) {
+            if (this.worldGrid.isInside(dest)) {
                 return dest;
             }
         }
@@ -167,25 +178,25 @@ var world = ( function (grid) {
         var dest = this.checkDestination(action, vector);
         if (dest === null ||
             critter.energy <= 1 ||
-            this.grid.get(dest) !== null) {
+            this.worldGrid.get(dest) !== null) {
             return false;
         }
 
         critter.energy -= 1;
-        this.grid.set(vector, null);
-        this.grid.set(dest, critter);
+        this.worldGrid.set(vector, null);
+        this.worldGrid.set(dest, critter);
         return true;
     };
 
     actionTypes.eat = function (critter, vector, action) {
         var dest = this.checkDestination(action, vector);
-        var atDest = dest !== null && this.grid.get(dest);
+        var atDest = dest !== null && this.worldGrid.get(dest);
         if (!atDest || atDest.energy === null) {
             return false;
         }
 
         critter.energy += atDest.energy;
-        this.grid.set(dest, null);
+        this.worldGrid.set(dest, null);
         return true;
     };
 
@@ -194,12 +205,12 @@ var world = ( function (grid) {
         var dest = this.checkDestination(action, vector);
         if (dest === null ||
             critter.energy <= 2 * baby.energy ||
-            this.grid.get(dest) !== null) {
+            this.worldGrid.get(dest) !== null) {
             return false;
         }
 
         critter.energy -= 2 * baby.energy;
-        this.grid.set(dest, baby);
+        this.worldGrid.set(dest, baby);
         return true;
     };
 
@@ -217,7 +228,7 @@ var world = ( function (grid) {
         if (!handled) {
             critter.energy -= 0.2;
             if (critter.energy <= 0) {
-                this.grid.set(vector, null);
+                this.worldGrid.set(vector, null);
             }
         }
     };
@@ -409,10 +420,7 @@ var valley = new world.LifelikeWorld(
         "*": ecosystem.Plant}
 );
 
-// (function(grid) {
-//     var aGrid = new grid.Grid(10, 10);
-//
-//     aGrid.set(new grid.Vector(1, 1), 10);
-//
-//     console.log(aGrid);
-// })(grid);
+for (var i = 0; i < 100; i++) {
+    valley.turn();
+    console.log(valley.toString());
+}
