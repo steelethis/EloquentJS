@@ -12,18 +12,22 @@ function parseExpression(program) {
         expr = {type: "word", name: match[0]};
     }
     else {
-        throw new SyntaxError("Unexepcted syntax: " + program);
+        throw new SyntaxError("Unexpected syntax: " + program);
     }
 
     return parseApply(expr, program.slice(match[0].length));
 }
 
 function skipSpace(string) {
-    var first = string.search(/\S/);
-    if (first === -1) {
-        return "";
+     // var re = /(#.*\\n)|(^\s*)/ig;
+    var re = /^((\s*)|(#.*\n))*/g;
+    var match = re.exec(string);
+
+    if (match === null || match[0].length === 0) {
+        return string;
     }
-    return string.slice(first);
+
+    return string.slice(match[0].length);
 }
 
 function parseApply(expr, program) {
@@ -228,3 +232,7 @@ run("do(define(sum, fun(array,",
     "             define(i, +(i, 1)))),",
     "        sum))),",
     "   print(sum(array(1, 2, 3))))");
+
+console.log(parse("# hello\nx"));
+
+console.log(parse("a # one\n   # two\n()"));
