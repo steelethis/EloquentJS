@@ -139,6 +139,10 @@ specialForms["define"] = function(args, env) {
     return value;
 };
 
+specialForms["set"] = function(args, env) {
+
+};
+
 specialForms["fun"] = function(args, env) {
     if (!args.length) {
         throw new SyntaxError("Functions need a body");
@@ -236,3 +240,10 @@ run("do(define(sum, fun(array,",
 console.log(parse("# hello\nx"));
 
 console.log(parse("a # one\n   # two\n()"));
+
+run("do(define(x, 4),",
+    "   define(setx, fun(val, set(x, val))),",
+    "   setx(50),",
+    "   print(x))");
+
+run("set(quux, true)");
