@@ -140,7 +140,27 @@ specialForms["define"] = function(args, env) {
 };
 
 specialForms["set"] = function(args, env) {
+    if (args.length !== 2 || args[0].type !== "word") {
+        throw new SyntaxError("Bad use of set");
+    }
 
+    // name of the variable we're trying to get the scope for.
+    var variableName = args[0].name;
+
+    // value we're passing to alter the scoped variable.
+    var value = evaluate(args[1], env);
+
+    // for each scope, get the next scope up.
+    // if a scope has the variable we're looking for, set that variable to whatever the value is and then return the value.
+    for (var scope = env; scope; scope = Object.getPrototypeOf(scope)) {
+        if (Object.prototype.hasOwnProperty.call(scope, variableName)) {
+            scope[variableName] = value;
+            return value;
+        }
+    }
+
+    // if we can't dig up the variable we're looking for in parent scopes, return a reference error.
+    throw new ReferenceError("Setting undefined variable " + variableName);
 };
 
 specialForms["fun"] = function(args, env) {
