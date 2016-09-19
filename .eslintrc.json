@@ -1,13 +1,19 @@
 {
     "extends": "airbnb",
     "env": {
-    "browser": true,
-    "node": true
+        "browser": true,
+        "node": true
     },
     "installedESLint": true,
     "plugins": [
         "react",
         "jsx-a11y",
         "import"
-    ]
+    ],
+    "rules": {
+        "no-console": "off",
+        "indent": "off",
+        "linebreak-style": "off",
+        "eqeqeq": "error"
+    }
 }
