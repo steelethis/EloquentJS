@@ -116,6 +116,42 @@ DOMDisplay.prototype.drawActors = function() {
     });
     return wrap;
 };
+DOMDisplay.prototype.drawFrame = function() {
+    if (this.actorLayer) {
+        this.wrap.removeChild(this.actorLayer);
+    }
+    this.actorLayer = this.wrap.appendChild(this.drawActors());
+    this.wrap.className = "game " + (this.level.status || "");
+    this.scrollPlayerIntoView();
+};
+DOMDisplay.prototype.scrollPlayerIntoView = function() {
+    var width = this.wrap.clientWidth;
+    var height = this.wrap.clientHeight;
+    var margin = width / 3;
+
+    // The viewport
+    var left = this.wrap.scrollLeft, right = left + width;
+    var top = this.wrap.scrollTop, bottom = top + height;
+
+    var player = this.level.player;
+    var center = player.pos.plus(player.size.times(0.5)).times(scale);
+
+    if (center.x < left + margin) {
+        this.wrap.scrollLeft = center.x - margin;
+    }
+    else if (center.x > right - margin) {
+        this.wrap.scrollLeft = center.x + margin - width;
+    }
+    if (center.y < top + margin) {
+        this.wrap.scrollTop = center.y - margin;
+    }
+    else if (center.y > bottom - margin) {
+        this.wrap.scrollTop = center.y + margin - height;
+    }
+};
+DOMDisplay.prototype.clear = function() {
+    this.wrap.parentNode.removeChild(this.wrap);
+};
 
 
 var actorChars = {
@@ -140,4 +176,5 @@ var simpleLevelPlan = [
 
 
 var simpleLevel = new Level(simpleLevelPlan);
+var display = new DOMDisplay(document.body, simpleLevel);
 console.log(simpleLevel.width, "by", simpleLevel.height);
