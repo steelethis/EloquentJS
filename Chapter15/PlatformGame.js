@@ -16,10 +16,10 @@ function Level(plan) {
             else if (ch === 'x') {
                 fieldType = 'wall';
             }
-            else if (ch === 'lava') {
+            else if (ch === '!') {
                 fieldType = 'lava';
             }
-            gridLine.push(gridLine);
+            gridLine.push(fieldType);
         }
         this.grid.push(gridLine);
     }

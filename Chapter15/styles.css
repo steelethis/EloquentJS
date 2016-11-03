@@ -6,11 +6,9 @@
 .background td {
     padding: 0;
 }
-
 .lava {
     background: rgb(255, 100, 100);
 }
-
 .wall {
     background: white;
 }
