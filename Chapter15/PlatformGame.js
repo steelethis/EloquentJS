@@ -62,6 +62,21 @@ Level.prototype.actorAt = function(actor) {
         }
     }
 };
+
+var maxStep = 0.05;
+Level.prototype.animate = function(step, keys) {
+    if (this.status !== null) {
+        this.finishDelay -= step;
+    }
+
+    while (step > 0) {
+        var thisStep = Math.min(step, maxStep);
+        this.actors.forEach( function(actor) {
+            actor.act(thisStep, this, keys);
+        }, this);
+        step -= thisStep;
+    }
+};
 Level.prototype.isFinished = function() {
     return this.status !== null && this.finishDelay < 0;
 };
