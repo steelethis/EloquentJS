@@ -134,6 +134,12 @@ function Coin(pos) {
     this.wobble = Math.random() * Math.PI * 2;
 }
 Coin.prototype.type = 'coin';
+var wobbleSpeed = 8, wobbleDist = 0.07;
+Coin.prototype.act = function(step) {
+    this.wobble += step * wobbleSpeed;
+    var wobblePos = Math.sin(this.wobble) * wobbleDist;
+    this.pos = this.basePos.plus(new Vector(0, wobblePos));
+};
 
 function elt(name, className) {
     var elt = document.createElement(name);
