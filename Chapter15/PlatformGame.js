@@ -221,6 +221,21 @@ function elt(name, className) {
     return elt;
 }
 
+var arrowCodes = {37: "left", 38: "up", 39: "right"};
+function trackKeys(codes) {
+    var pressed = Object.create(null);
+    function handler(event) {
+        if (codes.hasOwnProperty(event.keyCode)) {
+            var down = event.type === "keydown";
+            pressed[codes[event.keyCode]] = down;
+            event.preventDefault();
+        }
+    }
+    addEventListener("keydown", handler);
+    addEventListener("keyup", handler);
+    return pressed;
+}
+
 function DOMDisplay(parent, level) {
     this.wrap = parent.appendChild(elt("div", "game"));
     this.level = level;
@@ -291,6 +306,38 @@ DOMDisplay.prototype.clear = function() {
     this.wrap.parentNode.removeChild(this.wrap);
 };
 
+var arrows = trackKeys(arrowCodes);
+
+function runLevel(level, Display, andThen) {
+    var display = new Display(document.body, level);
+    runAnimation(function(step) {
+        level.animate(step, arrows);
+        display.drawFrame(step);
+        if (level.isFinished()) {
+            display.clear();
+            if (andThen) {
+                andThen(level.status);
+            }
+            return false;
+        }
+    });
+}
+
+function runAnimation(frameFunc) {
+    var lastTime = null;
+    function frame(time) {
+        var stop = false;
+        if (lastTime !== null) {
+            var timeStep = Math.min(time = lastTime, 100) / 1000;
+            stop = frameFunc(timeStep) === false;
+        }
+        lastTime = time;
+        if (!stop) {
+            requestAnimationFrame(frame);
+        }
+    }
+    requestAnimationFrame(frame);
+}
 
 var actorChars = {
     '@': Player,
